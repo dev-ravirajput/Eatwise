@@ -4,17 +4,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::middleware(['web', 'auth:sanctum'])->post('/logout', function (Request $request) {
-    auth()->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return response()->json(['message' => 'Logged out']);
-});
-
-
+// ✅ Public routes (login, register)
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/register', [AuthController::class, 'register']);
+
+// ✅ Protected routes (require authentication via Sanctum)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+
+    // Example of protected resources
+    Route::get('/dashboard', fn () => response()->json(['message' => 'Welcome to the dashboard']));
+    Route::get('/orders', fn () => response()->json(['orders' => []]));
+});

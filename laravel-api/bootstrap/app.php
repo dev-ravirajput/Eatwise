@@ -3,12 +3,6 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
 
 
@@ -20,22 +14,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-            $middleware->append([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                ShareErrorsFromSession::class,
-                ValidateCsrfToken::class,
-            ]);
+    $middleware->append([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+       // \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+    ]);
 
-            $middleware->alias([
-                'web' => [], // not needed since global middleware covers it
-                'api' => [
-                    EnsureFrontendRequestsAreStateful::class,
-                    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-                ],
-            ]);
-        })
+    $middleware->alias([
+        'web' => [],
+        'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+    ]);
+})
+
 
     ->withExceptions(function (Exceptions $exceptions): void {
         //
